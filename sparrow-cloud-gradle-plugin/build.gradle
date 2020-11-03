@@ -1,0 +1,15 @@
+plugins {
+    id "java-gradle-plugin"
+}
+dependencies {
+    implementation "org.springframework.boot:spring-boot-gradle-plugin:$springBootVersion"
+    implementation "io.spring.gradle:dependency-management-plugin:$dependencyManagementVersion"
+}
+gradlePlugin {
+    plugins {
+        sparrowGradlePlugin {
+            id = 'com.vastmoon.sparrow.cloud'
+            implementationClass = 'com.vastmoon.sparrow.gradle.SparrowGradlePlugin'
+        }
+    }
+}

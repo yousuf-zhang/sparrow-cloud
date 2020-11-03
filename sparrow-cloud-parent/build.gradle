@@ -1,0 +1,32 @@
+import org.springframework.boot.gradle.plugin.SpringBootPlugin
+
+apply plugin: 'java-platform'
+apply from: "$rootDir/gradle/publications.gradle"
+
+ext {
+    set('springCloudAlibabaVersion', "2.2.2.RELEASE")
+    set('springCloudVersion', "Hoxton.SR8")
+}
+javaPlatform {
+    allowDependencies()
+}
+
+dependencies {
+    api enforcedPlatform(SpringBootPlugin.BOM_COORDINATES)
+    api enforcedPlatform("org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}")
+    api enforcedPlatform("com.alibaba.cloud:spring-cloud-alibaba-dependencies:${springCloudAlibabaVersion}")
+    constraints {
+        api("org.apache.commons:commons-collections4:4.4")
+        api("cn.hutool:hutool-all:5.1.4")
+        api("com.github.ulisesbocchio:jasypt-spring-boot:3.0.2")
+    }
+
+}
+
+publishing {
+    publications {
+        mavenPlatform(MavenPublication) {
+            from components.javaPlatform
+        }
+    }
+}

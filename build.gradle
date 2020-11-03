@@ -1,0 +1,71 @@
+import org.springframework.boot.gradle.plugin.SpringBootPlugin
+
+buildscript {
+    ext {
+        set("springBootVersion", "2.3.4.RELEASE")
+        set("dependencyManagementVersion", "1.0.10.RELEASE")
+        set("ignoreProjects",
+            [
+                project(":sparrow-cloud-parent"),
+                project(":sparrow-cloud-dependencies"),
+                project(":sparrow-cloud-gradle-plugin")
+            ]
+        )
+        set("moduleProjects", subprojects - ignoreProjects)
+        set("excludeProjects", project(":sparrow-cloud-common"))
+    }
+
+}
+plugins {
+    id 'org.springframework.boot' version "$springBootVersion" apply false
+    id 'io.spring.dependency-management' version "$dependencyManagementVersion" apply false
+    id 'java'
+}
+configure(allprojects) {
+    group = 'com.vastmoon.sparrow'
+    version = '0.0.1-SNAPSHOT'
+    repositories {
+        mavenCentral()
+    }
+
+    tasks.withType(JavaCompile) {
+        options.encoding = "UTF-8"
+    }
+}
+
+configure(moduleProjects) {
+    apply plugin: "java"
+    apply from: "${rootDir}/gradle/framework-module.gradle"
+    sourceCompatibility = '1.8'
+    configurations {
+        compileOnly {
+            extendsFrom annotationProcessor
+        }
+    }
+    test {
+        useJUnitPlatform()
+    }
+}
+
+configure(moduleProjects - excludeProjects) {
+    apply plugin: "io.spring.dependency-management"
+    dependencyManagement {
+        imports {
+            mavenBom SpringBootPlugin.BOM_COORDINATES
+        }
+        generatedPomCustomization {
+            enabled = false
+        }
+    }
+    dependencies {
+        implementation(enforcedPlatform(project(":sparrow-cloud-parent")))
+        compileOnly 'org.projectlombok:lombok'
+        annotationProcessor 'org.projectlombok:lombok'
+        annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+        testImplementation('org.springframework.boot:spring-boot-starter-test') {
+            exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+        }
+    }
+}
+
+
